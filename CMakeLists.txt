@@ -76,10 +76,11 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES(/usr/local/lib/)
 
 
-add_executable(${PROJECT_NAME}_node ${${PROJECT_NAME}_SRC_DIR}/${PROJECT_NAME}/main.cpp ${proc_deep_detector_FILES})
+add_executable(${PROJECT_NAME}_node ${${PROJECT_NAME}_SRC_DIR}/${PROJECT_NAME}/main.cc ${proc_deep_detector_FILES})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}_node
         tensorflow_cc
         tensorflow_framework
         ${OpenCV_LIBRARIES}
+        ${catkin_LIBRARIES}
         )

@@ -17,11 +17,8 @@
 /// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
 
 #include "TensorflowObjectDetection.h"
+#include <utility>
 
-
-TensorflowObjectDetection::TensorflowObjectDetection(const std::string &config_path) {
-
-}
 
 TensorflowObjectDetection::TensorflowObjectDetection(const std::string &graph_path, std::string input_node,
                                                      std::string output_node):
@@ -31,6 +28,13 @@ TensorflowObjectDetection::TensorflowObjectDetection(const std::string &graph_pa
 
 }
 
-void TensorflowObjectDetection::ParseConfigFile(const std::string &config_path) {
+void TensorflowObjectDetection::Run(tensorflow::Tensor &img) {
+    std::pair<std::string, tensorflow::Tensor> input_pair = std::make_pair(input_node_, img);
+    std::vector<std::pair<std::string, tensorflow::Tensor>> inference_input_;
+    inference_input_.push_back(input_pair);
+    session_->Run(inference_input_, output_node_, {}, &output_);
+}
 
+void TensorflowObjectDetection::Run(){
+    return;
 }

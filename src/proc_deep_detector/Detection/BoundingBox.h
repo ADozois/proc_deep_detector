@@ -15,26 +15,31 @@
 ///
 /// You should have received a copy of the GNU General Public License
 /// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
-#include "TensorflowModel.h"
+
+#ifndef PROC_DEEP_DETECTOR_BOUNDINGBOX_H
+#define PROC_DEEP_DETECTOR_BOUNDINGBOX_H
+
+#include <geometry_msgs/Pose2D.h>
 
 
-TensorflowModel::TensorflowModel(const std::string &graph_path):
-    session_(),
-    session_status_(),
-    graph_(graph_path)
-{
-    CreateSession();
-}
+struct BoundingBox{
+    geometry_msgs::Pose2D center_;
+    double width_;
+    double height_;
 
-void TensorflowModel::CreateSession() {
-    if (graph_.GetStatusGraph() == tensorflow::Status::OK()){
-        session_.reset(tensorflow::NewSession(tensorflow::SessionOptions()));
-        session_status_ = session_->Create(graph_.GetGraph());
-
-        if (!session_status_.ok()){
-            throw std::runtime_error("Can't create session");
-        }
-    } else{
-        throw std::runtime_error("Error with graph: " + graph_.GetStatusGraph().ToString());
+    void TransferPose(geometry_msgs::Pose2D * src, geometry_msgs::Pose2D * dst){
+        dst->x = src->x;
+        dst->y = src->y;
+        dst->theta= src->theta;
     }
-}
+
+    void TransferBoundingBox(BoundingBox * src){
+        TransferPose(&src->center_, &center_);
+        height_ = src->height_;
+        width_ = src->width_;
+    }
+};
+
+
+
+#endif //PROC_DEEP_DETECTOR_BOUNDINGBOX_H

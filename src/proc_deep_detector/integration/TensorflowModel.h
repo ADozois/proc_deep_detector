@@ -27,10 +27,12 @@ class TensorflowModel {
 public:
     TensorflowModel() = delete;
     explicit TensorflowModel(const std::string &graph_path);
-    ~TensorflowModel() = default;
+    virtual ~TensorflowModel() = default;
+
+    virtual void Run() = 0;
 
 
-private:
+protected:
     std::unique_ptr<tensorflow::Session>  session_;
     TensorflowGraph graph_;
     tensorflow::Status session_status_;

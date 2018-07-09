@@ -15,26 +15,36 @@
 ///
 /// You should have received a copy of the GNU General Public License
 /// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
-#include "TensorflowModel.h"
+
+#ifndef PROC_DEEP_DETECTOR_OBJECTDETECTION_H
+#define PROC_DEEP_DETECTOR_OBJECTDETECTION_H
+
+#include "BoundingBox.h"
 
 
-TensorflowModel::TensorflowModel(const std::string &graph_path):
-    session_(),
-    session_status_(),
-    graph_(graph_path)
-{
-    CreateSession();
-}
+class ObjectDetection {
+public:
+    ObjectDetection() = default;
+    ~ObjectDetection() = default;
+    ObjectDetection(BoundingBox bbox, std::string class_name, double confidence);
+    ObjectDetection(double center_x, double center_y, double width, double height,
+                        std::string class_name, double confidence);
 
-void TensorflowModel::CreateSession() {
-    if (graph_.GetStatusGraph() == tensorflow::Status::OK()){
-        session_.reset(tensorflow::NewSession(tensorflow::SessionOptions()));
-        session_status_ = session_->Create(graph_.GetGraph());
+    bool operator>(const ObjectDetection &object);
+    bool operator==(const ObjectDetection &object);
 
-        if (!session_status_.ok()){
-            throw std::runtime_error("Can't create session");
-        }
-    } else{
-        throw std::runtime_error("Error with graph: " + graph_.GetStatusGraph().ToString());
-    }
-}
+    const BoundingBox &GetBbox_() const;
+
+    const std::string &GetClass_name_() const;
+
+    double GetConfidence_() const;
+
+private:
+    BoundingBox bbox_;
+    std::string class_name_;
+    double confidence_;
+
+};
+
+
+#endif //PROC_DEEP_DETECTOR_OBJECTDETECTION_H
