@@ -24,16 +24,20 @@
 #include "opencv2/core/core.hpp"
 #include "../Detection/ObjectDetection.h"
 
-class TensorflowObjectDetection: public TensorflowModel {
+class TensorflowObjectDetection: public TensorflowModel::TensorflowModel {
 public:
     TensorflowObjectDetection() = delete;
-    TensorflowObjectDetection(const std::string &graph_path, std::string input_node, std::string output_node);
+    TensorflowObjectDetection(const std::string &graph_path, std::string input_node,
+                              std::vector<std::string> output_node);
     ~TensorflowObjectDetection() = default;
 
     void Run(tensorflow::Tensor &img);
     void Run() override;
     std::vector<tensorflow::Tensor> Run(cv::Mat &img);
 
+    void AddImage(cv::Mat &img);
+
+    TensorflowObjectDetection & operator=(const TensorflowObjectDetection &object);
 
 private:
     std::vector<tensorflow::Tensor> input_;
@@ -44,6 +48,8 @@ private:
     double threshold_;
 
     void FilterOutput();
+
+    tensorflow::Tensor ImageToTensor(cv::Mat &img);
 };
 
 

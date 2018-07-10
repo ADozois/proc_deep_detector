@@ -23,31 +23,25 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "integration/TensorflowObjectDetection.h"
+#include "ros/ros.h"
+#include "proc_deep_detector.h"
+#include "integration/TensorflowModel.h"
 
-int main() {
-    std::string graph_path = "/home/walle/Workspaces/ros_sonia_ws/src/deep_detector/models/ssd_mobilenet_v11_coco/frozen_inference_graph.pb";
-    std::string image_path = "/home/walle/PS/test.jpg";
 
-    tensorflow::Session* session= nullptr;
-    tensorflow::Status status = tensorflow::NewSession(tensorflow::SessionOptions(), &session);
+int main(int argc, char **argv) {
+    std::string graph_path = "/home/walle/Downloads/frozen_inference_graph.pb";
+    std::string input_node = "image_tensor:0";
+    std::vector<std::string> output_node = {"detection_boxes:0", "detection_scores:0", "detection_classes:0", "num_detections:0"};
 
-    if (!status.ok()) {
-        std::cout << "Can't create session_. Error: " << status.ToString() << "\n";
-        return 1;
-    } else {
-        std::cout << "Session successfully created" << std::endl;
+    ros::init(argc, argv, "proc_deep_detector");
+    ros::NodeHandle nh("~");
+
+    proc_deep_detector::DeepNetwork net(nh, graph_path, input_node, output_node, TensorflowModel::ModelType::DETECTION);
+
+    while (ros::ok()){
+        usleep(20000);
+        ros::spinOnce();
     }
-
-    tensorflow::GraphDef graph;
-    status = tensorflow::ReadBinaryProto(tensorflow::Env::Default(), graph_path, &graph);
-
-    if (!status.ok()) {
-        std::cout << "Can't create graph_. Error: " << status.ToString() << "\n";
-        return 1;
-    } else {
-        std::cout << "Graph successfully created" << std::endl;
-    }
-
 
     return 0;
 }

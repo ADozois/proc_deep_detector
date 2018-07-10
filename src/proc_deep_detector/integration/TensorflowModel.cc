@@ -17,24 +17,26 @@
 /// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
 #include "TensorflowModel.h"
 
+namespace TensorflowModel {
 
-TensorflowModel::TensorflowModel(const std::string &graph_path):
-    session_(),
-    session_status_(),
-    graph_(graph_path)
-{
+TensorflowModel::TensorflowModel(const std::string &graph_path) :
+        session_(),
+        session_status_(),
+        graph_(graph_path) {
     CreateSession();
 }
 
 void TensorflowModel::CreateSession() {
-    if (graph_.GetStatusGraph() == tensorflow::Status::OK()){
+    if (graph_.GetStatusGraph() == tensorflow::Status::OK()) {
         session_.reset(tensorflow::NewSession(tensorflow::SessionOptions()));
         session_status_ = session_->Create(graph_.GetGraph());
 
-        if (!session_status_.ok()){
+        if (!session_status_.ok()) {
             throw std::runtime_error("Can't create session");
         }
-    } else{
+    } else {
         throw std::runtime_error("Error with graph: " + graph_.GetStatusGraph().ToString());
     }
+}
+
 }

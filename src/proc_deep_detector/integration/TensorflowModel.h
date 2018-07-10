@@ -22,6 +22,9 @@
 #include <tensorflow/core/public/session.h>
 #include "TensorflowGraph.h"
 
+namespace TensorflowModel {
+
+enum class ModelType{REGRESSION, CLASSIFICATION, DETECTION};
 
 class TensorflowModel {
 public:
@@ -39,6 +42,11 @@ protected:
 
     void CreateSession();
 };
+
+
+}
+
+
 
 
 #endif //TENSOR_TENSORFLOWSESSION_H
