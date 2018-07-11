@@ -16,6 +16,27 @@
 /// You should have received a copy of the GNU General Public License
 /// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
 
+
+
+#include "tensorflow/cc/ops/const_op.h"
+#include "tensorflow/cc/ops/image_ops.h"
+#include "tensorflow/cc/ops/standard_ops.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/tensor.h"
+#include "tensorflow/core/graph/default_device.h"
+#include "tensorflow/core/graph/graph_def_builder.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/core/threadpool.h"
+#include "tensorflow/core/lib/io/path.h"
+#include "tensorflow/core/lib/strings/stringprintf.h"
+#include "tensorflow/core/platform/env.h"
+#include "tensorflow/core/platform/init_main.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/types.h"
+#include "tensorflow/core/public/session.h"
+#include "tensorflow/core/util/command_line_flags.h"
+
 #include "TensorflowObjectDetection.h"
 #include <utility>
 
@@ -62,24 +83,33 @@ TensorflowObjectDetection &TensorflowObjectDetection::operator=(const Tensorflow
 }
 
 tensorflow::Tensor TensorflowObjectDetection::ImageToTensor(cv::Mat &img) {
+
+    auto root = tensorflow::Scope::NewRootScope();
+    using namespace ::tensorflow::ops;
+
     tensorflow::Tensor image_input = tensorflow::Tensor(tensorflow::DT_FLOAT, tensorflow::TensorShape(
             {1, img.size().height, img.size().width, img.channels()}));
-    auto input_tensor_mapped = image_input.tensor<float, 4>();
-    cv::Mat image_float;
-    img.convertTo(image_float, CV_32FC1);
-    const float *source_data = (float *) image_float.data;
+    float* tensor_data_ptr = image_input.flat<float>().data();
+    cv::Mat fake_mat(img.rows, img.cols, CV_32FC3, tensor_data_ptr);
+    img.convertTo(fake_mat, CV_32FC3);
 
-    for (int y = 0; y < img.size().height; ++y) {
-        const float *source_row = source_data + (y * img.size().height * img.channels());
-        for (int x = 0; x < img.size().width; ++x) {
-            const float *source_pixel = source_row + (x * img.channels());
-            for (int c = 0; c < img.channels(); ++c) {
-                const float *source_value = source_pixel + c;
-                input_tensor_mapped(0, y, x, c) = *source_value;
-            }
-        }
-    }
+    auto input_tensor = Placeholder(root.WithOpName("input"), tensorflow::DT_FLOAT);
+    std::vector<std::pair<std::string, tensorflow::Tensor>> inputs = {{"input", image_input}};
+    auto uint8Caster = Cast(root.WithOpName("uint8_Cast"), image_input, tensorflow::DT_UINT8);
+
+    tensorflow::GraphDef graph;
+    root.ToGraphDef(&graph);
+
+    std::vector<tensorflow::Tensor> outTensors;
+    std::unique_ptr<tensorflow::Session> session(tensorflow::NewSession(tensorflow::SessionOptions()));
+
+    session->Create(graph);
+    session->Run({inputs}, {"uint8_Cast"}, {}, &outTensors);
+
+    image_input = outTensors.at(0);
+
     return image_input;
+
 }
 
 void TensorflowObjectDetection::AddImage(cv::Mat &img) {
