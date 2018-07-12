@@ -29,8 +29,8 @@
 
 
 int main(int argc, char **argv) {
-    std::string graph_path = "/home/walle/Downloads/frozen_inference_graph.pb";
-    std::string label = "/home/walle/Workspaces/ros_sonia_ws/src/deep_detector/models/ssd_mobilenet_v1_guztav/label_map.pbtxt";
+    std::string graph_path = "/home/walle/Documents/frozen_inference_graph.pb";
+    std::string label = "/home/walle/Documents/label_map.pbtxt";
     std::string input_node = "image_tensor:0";
     std::vector<std::string> output_node = {"detection_boxes:0", "detection_scores:0", "detection_classes:0", "num_detections:0"};
 

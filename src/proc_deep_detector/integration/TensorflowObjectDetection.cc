@@ -80,6 +80,7 @@ void TensorflowObjectDetection::Run() {
     } else {
         std::cout << "Nothing detected" << std::endl;
     }
+    input_.erase(input_.begin());
 }
 
 std::vector<tensorflow::Tensor> TensorflowObjectDetection::Run(cv::Mat &img) {
@@ -171,8 +172,8 @@ geometry_msgs::Pose2D
 TensorflowObjectDetection::CalculateCenter(float &left, float &right, float &top, float &bottom) {
     geometry_msgs::Pose2D center;
     center.theta = 0.0;
-    center.x = (right - left)/2.0;
-    center.y = (bottom - top)/2.0;
+    center.x = left + (right - left)/2.0;
+    center.y = top + (bottom - top)/2.0;
     return center;
 }
 
@@ -216,11 +217,11 @@ int TensorflowObjectDetection::ExtractId(const std::string &line) {
 }
 
 std::string TensorflowObjectDetection::ExtractName(const std::string &line) {
-    const std::regex reg_name("\'.+\'");
+    const std::regex reg_name("\".+\"");
     std::smatch matcher_name;
     std::regex_search(line, matcher_name, reg_name);
     std::string result =  matcher_name.str();
-    boost::erase_all(result, "\'");
+    boost::erase_all(result, "\"");
     return result;
 }
 

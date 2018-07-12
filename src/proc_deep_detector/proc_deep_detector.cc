@@ -38,7 +38,7 @@ DeepNetwork::DeepNetwork(const ros::NodeHandle &nh, const std::string &model_pat
     it_{nh}{
     if (type == ModelType::DETECTION){
         model_ .reset(new TensorflowObjectDetection(model_path, label_path, input_node, output_node, 0.5));
-        image_subscriber_ = it_.subscribe("/provider_vision/Front_GigE", 10, &DeepNetwork::ImageCallback, this);
+        image_subscriber_ = it_.subscribe("/usb_cam/image_raw", 10, &DeepNetwork::ImageCallback, this);
         bbox_publisher_ = nh_.advertise<DetectionArray>("/proc_deep_detector/bounding_box", 10);
     }
 }
@@ -48,6 +48,7 @@ void DeepNetwork::ImageCallback(const sensor_msgs::ImageConstPtr &msg) {
     try
     {
         cv_bridge::toCvShare(msg, "bgr8")->image.copyTo(img_);
+        cv::cvtColor(img_, img_, cv::COLOR_BGR2RGB);
         std::shared_ptr<TensorflowObjectDetection> detection = std::static_pointer_cast<TensorflowObjectDetection>(model_);
         detection->AddImage(img_);
         detection->Run();
