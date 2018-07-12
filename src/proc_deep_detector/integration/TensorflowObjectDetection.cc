@@ -232,4 +232,8 @@ std::string TensorflowObjectDetection::ConvertIdToName(int id) {
     return name;
 }
 
+    std::vector<Detection> TensorflowObjectDetection::GetPredictions() {
+        return prediction_;
+    }
+
 }

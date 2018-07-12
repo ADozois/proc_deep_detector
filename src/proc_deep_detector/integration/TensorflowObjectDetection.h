@@ -47,6 +47,8 @@ public:
 
     TensorflowObjectDetection &operator=(const TensorflowObjectDetection &object);
 
+    std::vector<Detection> GetPredictions();
+
 private:
     std::vector<tensorflow::Tensor> input_;
     std::vector<tensorflow::Tensor> output_;
