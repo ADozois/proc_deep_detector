@@ -1,6 +1,20 @@
-//
-// Created by walle on 7/5/18.
-//
+/// \author	Antoine Dozois <dozois.a@gmail.com>
+/// \copyright Copyright (c) 2018 S.O.N.I.A. All rights reserved.
+/// \section LICENSE
+/// This file is part of S.O.N.I.A. software.
+///
+/// S.O.N.I.A. software is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU General Public License as published by
+/// the Free Software Foundation, either version 3 of the License, or
+/// (at your option) any later version.
+///
+/// S.O.N.I.A. software is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
 
 #include "proc_deep_detector.h"
 #include "integration/TensorflowObjectDetection.h"
@@ -24,7 +38,8 @@ DeepNetwork::DeepNetwork(const ros::NodeHandle &nh, const std::string &model_pat
     it_{nh}{
     if (type == ModelType::DETECTION){
         model_ .reset(new TensorflowObjectDetection(model_path, label_path, input_node, output_node, 0.5));
-        subscriber_ = it_.subscribe("/provider_vision/Front_GigE", 10, &DeepNetwork::ImageCallback, this);
+        image_subscriber_ = it_.subscribe("/provider_vision/Front_GigE", 10, &DeepNetwork::ImageCallback, this);
+        bbox_publisher_ = nh_.advertise<DetectionArray>("/proc_deep_detector/bounding_box", 10);
     }
 }
 
@@ -36,6 +51,8 @@ void DeepNetwork::ImageCallback(const sensor_msgs::ImageConstPtr &msg) {
         std::shared_ptr<TensorflowObjectDetection> detection = std::static_pointer_cast<TensorflowObjectDetection>(model_);
         detection->AddImage(img_);
         detection->Run();
+        objects_.detected_object = detection->GetPredictions();
+        bbox_publisher_.publish(objects_);
     }
     catch (cv_bridge::Exception& e)
     {
