@@ -41,7 +41,7 @@ file(GLOB msg_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/srv/"
         "${CMAKE_CURRENT_SOURCE_DIR}/msg/*.msg")
 add_message_files(DIRECTORY msg FILES ${msg_files})
 
-#generate_messages(DEPENDENCIES std_msgs geometry_msgs sensor_msgs )
+generate_messages(DEPENDENCIES std_msgs geometry_msgs sensor_msgs )
 
 catkin_package(
         INCLUDE_DIRS ${proc_deep_detector_SRC_DIR}
@@ -84,3 +84,5 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}_node
         ${OpenCV_LIBRARIES}
         ${catkin_LIBRARIES}
         )
+
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_cpp)

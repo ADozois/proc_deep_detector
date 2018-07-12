@@ -16,13 +16,14 @@ DeepNetwork::DeepNetwork(const ros::NodeHandle &nh):
 
 }
 
-DeepNetwork::DeepNetwork(const ros::NodeHandle &nh, const std::string &model_path, const std::string &input_node,
-                         const std::vector<std::string> &output_node, ModelType type) :
+DeepNetwork::DeepNetwork(const ros::NodeHandle &nh, const std::string &model_path, const std::string &label_path,
+                         const std::string &input_node, const std::vector<std::string> &output_node,
+                         ModelType type) :
     nh_{nh},
     model_{nullptr},
     it_{nh}{
     if (type == ModelType::DETECTION){
-        model_ .reset(new TensorflowObjectDetection(model_path, input_node, output_node));
+        model_ .reset(new TensorflowObjectDetection(model_path, label_path, input_node, output_node, 0.5));
         subscriber_ = it_.subscribe("/provider_vision/Front_GigE", 10, &DeepNetwork::ImageCallback, this);
     }
 }

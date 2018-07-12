@@ -30,13 +30,15 @@
 
 int main(int argc, char **argv) {
     std::string graph_path = "/home/walle/Downloads/frozen_inference_graph.pb";
+    std::string label = "/home/walle/Workspaces/ros_sonia_ws/src/deep_detector/models/ssd_mobilenet_v1_guztav/label_map.pbtxt";
     std::string input_node = "image_tensor:0";
     std::vector<std::string> output_node = {"detection_boxes:0", "detection_scores:0", "detection_classes:0", "num_detections:0"};
 
     ros::init(argc, argv, "proc_deep_detector");
     ros::NodeHandle nh("~");
 
-    proc_deep_detector::DeepNetwork net(nh, graph_path, input_node, output_node, TensorflowModel::ModelType::DETECTION);
+    proc_deep_detector::DeepNetwork net(nh, graph_path, label, input_node, output_node,
+                                        TensorflowModel::ModelType::DETECTION);
 
     while (ros::ok()){
         usleep(20000);

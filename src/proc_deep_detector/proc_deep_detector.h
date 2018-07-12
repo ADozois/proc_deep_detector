@@ -22,8 +22,9 @@ public:
     DeepNetwork() = delete;
     ~DeepNetwork() = default;
     DeepNetwork(const ros::NodeHandle &nh);
-    DeepNetwork(const ros::NodeHandle &nh, const std::string &model_path, const std::string &input_node,
-                const std::vector<std::string> &output_node, ModelType type);
+    DeepNetwork(const ros::NodeHandle &nh, const std::string &model_path, const std::string &label_path,
+                    const std::string &input_node, const std::vector<std::string> &output_node,
+                    ModelType type);
 
 private:
     ros::NodeHandle nh_;
