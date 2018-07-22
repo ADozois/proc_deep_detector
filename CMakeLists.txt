@@ -28,14 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
         cv_bridge
         roslaunch
         lib_atlas
-        OpenCV
 )
-
-# CMake does not detect new file when globbing.
-# Please, regenerate your CMake solution if you add a file.
-file(GLOB srv_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/srv/"
-        "${CMAKE_CURRENT_SOURCE_DIR}/srv/*.srv")
-add_service_files(DIRECTORY srv FILES ${srv_files})
 
 file(GLOB msg_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/srv/"
         "${CMAKE_CURRENT_SOURCE_DIR}/msg/*.msg")

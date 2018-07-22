@@ -74,6 +74,7 @@ void TensorflowObjectDetection::Run() {
     std::vector<std::pair<std::string, tensorflow::Tensor>> inference_input_;
     inference_input_.push_back(input_pair);
     session_->Run(inference_input_, output_node_, {}, &output_);
+    FilterOutput();
     input_.erase(input_.begin());
 }
 
