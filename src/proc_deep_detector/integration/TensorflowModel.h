@@ -22,9 +22,9 @@
 #include <tensorflow/core/public/session.h>
 #include "TensorflowGraph.h"
 
-namespace TensorflowModel {
+namespace proc_deep_detector {
 
-enum class ModelType{REGRESSION, CLASSIFICATION, DETECTION};
+enum class ModelType{REGRESSION = 0, CLASSIFICATION, DETECTION};
 
 class TensorflowModel {
 public:
@@ -33,6 +33,9 @@ public:
     virtual ~TensorflowModel() = default;
 
     virtual void Run() = 0;
+
+    static ModelType GetModelType(const std::string &name);
+    static ModelType GetModelType(const int &type_number);
 
 
 protected:

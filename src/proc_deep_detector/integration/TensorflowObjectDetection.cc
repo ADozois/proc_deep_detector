@@ -74,12 +74,6 @@ void TensorflowObjectDetection::Run() {
     std::vector<std::pair<std::string, tensorflow::Tensor>> inference_input_;
     inference_input_.push_back(input_pair);
     session_->Run(inference_input_, output_node_, {}, &output_);
-    if (!output_.empty()) {
-        std::cout << "Object detected" << std::endl;
-        FilterOutput();
-    } else {
-        std::cout << "Nothing detected" << std::endl;
-    }
     input_.erase(input_.begin());
 }
 

@@ -15,9 +15,11 @@
 ///
 /// You should have received a copy of the GNU General Public License
 /// along with S.O.N.I.A. software. If not, see <http://www.gnu.org/licenses/>.
-#include "TensorflowModel.h"
 
-namespace TensorflowModel {
+#include "TensorflowModel.h"
+#include <algorithm>
+
+namespace proc_deep_detector {
 
 TensorflowModel::TensorflowModel(const std::string &graph_path) :
         session_(),
@@ -38,5 +40,38 @@ void TensorflowModel::CreateSession() {
         throw std::runtime_error("Error with graph: " + graph_.GetStatusGraph().ToString());
     }
 }
+
+    ModelType TensorflowModel::GetModelType(const std::string &name) {
+        //std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        ModelType type;
+        if(name == "detection"){
+            type  = ModelType::DETECTION;
+        } else if(name == "classification"){
+            type = ModelType::CLASSIFICATION;
+        } else if(name == "regression"){
+            type = ModelType::REGRESSION;
+        } else{
+            throw std::runtime_error("Type of model: " + name + " not supported");
+        }
+        return type;
+    }
+
+    ModelType TensorflowModel::GetModelType(const int &type_number) {
+        ModelType type;
+        switch(type_number){
+            case 0:
+                type  = ModelType::REGRESSION;
+                break;
+            case 1:
+                type  = ModelType::CLASSIFICATION;
+                break;
+            case 2:
+                type  = ModelType::DETECTION;
+                break;
+            default:
+                throw std::runtime_error("Type of model not supported");
+        }
+        return type;
+    }
 
 }

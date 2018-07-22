@@ -1,0 +1,7 @@
+model_path: "/home/walle/Documents/frozen_inference_graph.pb"
+label_path: "/home/walle/Documents/label_map.pbtxt"
+input_node: "image_tensor:0"
+output_node: ["detection_boxes:0", "detection_scores:0", "detection_classes:0", "num_detections:0"]
+type: "detection"
+image_subscriber: "/usb_cam/image_raw"
+threshold: 0.5

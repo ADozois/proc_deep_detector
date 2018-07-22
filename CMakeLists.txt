@@ -83,6 +83,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}_node
         tensorflow_framework
         ${OpenCV_LIBRARIES}
         ${catkin_LIBRARIES}
+        yaml-cpp
         )
 
 add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_cpp)

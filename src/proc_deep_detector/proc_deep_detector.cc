@@ -23,41 +23,62 @@
 
 using namespace proc_deep_detector;
 
-DeepNetwork::DeepNetwork(const ros::NodeHandle &nh):
-    nh_{nh},
-    model_{nullptr},
-    it_{nh}{
-
+DeepNetwork::DeepNetwork(const ros::NodeHandle &nh, const std::string &config_file) :
+        config_{YAML::LoadFile(config_file)},
+        nh_{nh},
+        model_{nullptr},
+        it_{nh}{
+        std::string model_path = config_["model_path"].as<std::string>();
+        std::string label_path = config_["label_path"].as<std::string>();
+        std::string input_node = config_["input_node"].as<std::string>();
+        std::vector<std::string> output_node = config_["output_node"].as<std::vector<std::string>>();
+        subscriber_name_ = config_["image_subscriber"].as<std::string>();
+        ModelType type = TensorflowModel::GetModelType(config_["type"].as<std::string>());
+        float threshold = config_["threshold"].as<float>();
+    if (type == ModelType::DETECTION) {
+        ROS_INFO("Loading model");
+        model_.reset(new TensorflowObjectDetection(model_path, label_path, input_node, output_node, threshold));
+        ROS_INFO("Model loaded");
+        bbox_publisher_ = nh_.advertise<DetectionArray>("/proc_deep_detector/bounding_box", 10);
+        image_subscriber_ = it_.subscribe(subscriber_name_, 10, &DeepNetwork::ImageCallback, this);
+        ROS_INFO("Starting detection");
+    }
 }
 
 DeepNetwork::DeepNetwork(const ros::NodeHandle &nh, const std::string &model_path, const std::string &label_path,
                          const std::string &input_node, const std::vector<std::string> &output_node,
-                         ModelType type) :
-    nh_{nh},
-    model_{nullptr},
-    it_{nh}{
-    if (type == ModelType::DETECTION){
-        model_ .reset(new TensorflowObjectDetection(model_path, label_path, input_node, output_node, 0.5));
-        image_subscriber_ = it_.subscribe("/usb_cam/image_raw", 10, &DeepNetwork::ImageCallback, this);
+                         const std::string &image_subscriber, ModelType type) :
+        nh_{nh},
+        model_{nullptr},
+        it_{nh},
+        subscriber_name_{image_subscriber}{
+    if (type == ModelType::DETECTION) {
+        ROS_INFO("Loading model");
+        model_.reset(new TensorflowObjectDetection(model_path, label_path, input_node, output_node, 0.5));
+        ROS_INFO("Model loaded");
         bbox_publisher_ = nh_.advertise<DetectionArray>("/proc_deep_detector/bounding_box", 10);
+        image_subscriber_ = it_.subscribe(subscriber_name_, 10, &DeepNetwork::ImageCallback, this);
+        ROS_INFO("Starting detection");
     }
 }
 
 void DeepNetwork::ImageCallback(const sensor_msgs::ImageConstPtr &msg) {
     img_lock_.lock();
-    try
-    {
+    try {
         cv_bridge::toCvShare(msg, "bgr8")->image.copyTo(img_);
         cv::cvtColor(img_, img_, cv::COLOR_BGR2RGB);
-        std::shared_ptr<TensorflowObjectDetection> detection = std::static_pointer_cast<TensorflowObjectDetection>(model_);
+        std::shared_ptr<TensorflowObjectDetection> detection = std::static_pointer_cast<TensorflowObjectDetection>(
+                model_);
         detection->AddImage(img_);
         detection->Run();
         objects_.detected_object = detection->GetPredictions();
         bbox_publisher_.publish(objects_);
     }
-    catch (cv_bridge::Exception& e)
-    {
-        ROS_ERROR("%s Could not convert from '%s' to 'bgr8'.", "Topic: /provider_vision/FrontGigE", msg->encoding.c_str());
+    catch (cv_bridge::Exception &e) {
+        ROS_ERROR("%s Could not convert from '%s' to 'bgr8'.", "Topic: ", subscriber_name_.c_str(),
+                  msg->encoding.c_str());
     }
     img_lock_.unlock();
 }
+
+

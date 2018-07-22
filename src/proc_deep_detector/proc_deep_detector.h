@@ -25,31 +25,33 @@
 #include "opencv2/imgproc.hpp"
 #include <cv_bridge/cv_bridge.h>
 #include <proc_deep_detector/DetectionArray.h>
+#include <yaml-cpp/yaml.h>
 
 
 namespace proc_deep_detector{
 
 using namespace proc_deep_detector;
-using namespace TensorflowModel;
 
 class DeepNetwork {
 public:
     DeepNetwork() = delete;
     ~DeepNetwork() = default;
-    DeepNetwork(const ros::NodeHandle &nh);
+    DeepNetwork(const ros::NodeHandle &nh, const std::string &config_file);
     DeepNetwork(const ros::NodeHandle &nh, const std::string &model_path, const std::string &label_path,
                     const std::string &input_node, const std::vector<std::string> &output_node,
-                    ModelType type);
+                    const std::string &image_subscriber, ModelType type);
 
 private:
     ros::NodeHandle nh_;
-    std::shared_ptr<TensorflowModel::TensorflowModel> model_;
+    std::shared_ptr<TensorflowModel> model_;
     image_transport::ImageTransport it_;
     image_transport::Subscriber image_subscriber_;
+    std::string subscriber_name_;
     ros::Publisher bbox_publisher_;
     DetectionArray objects_;
     cv::Mat img_;
     std::mutex img_lock_;
+    YAML::Node config_;
 
     void ImageCallback(const sensor_msgs::ImageConstPtr& msg);
 };
